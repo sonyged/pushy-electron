@@ -1,8 +1,14 @@
 const config = require('../config');
 const fetch = require('node-fetch').default; // Workaround for #2: https://github.com/pushy-me/pushy-electron/issues/2
+const HttpsProxyAgent = require('https-proxy-agent');
 const localStorage = new (require('electron-store'))();
 
 module.exports = {
+    setProxy(proxy) {
+        this.proxy = proxy
+        console.log('set proxy', this.proxy)
+    },
+
     async get(path, options) {
         // Nothing special to do here, simply send the request
         return await this.execute(path, options || {});
@@ -26,9 +32,16 @@ module.exports = {
     },
 
     async execute(path, options) {
+        // proxy settings
+        console.log("proxy settings:", this.proxy)
+        if (this.proxy) {
+            options.agent = new HttpsProxyAgent(this.proxy)
+        }
+
         // Build full URL to API endpoint
         var url = this.getApiHost() + path;
 
+        console.log('options', options)
         // Execute HTTP request
         let response = await fetch(url, options);
 
@@ -51,7 +64,7 @@ module.exports = {
     getApiHost() {
         // Development API endpoint for localhost
         // return config.api.devEndpoint;
-        
+
         // Attempt to fetch Pushy Enterprise hostname (may be null)
         let enterpriseEndpoint = localStorage.get(config.storageKeys.enterpriseEndpoint);
 

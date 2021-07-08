@@ -1,10 +1,13 @@
 import {BrowserWindow} from "electron";
+import {HttpsProxyAgentOptions} from 'https-proxy-agent'
 
 declare namespace Pushy {
 
     type DeviceToken = string
 
     type Listener<T> = (data: T) => void
+
+    function setProxy(proxy: HttpsProxyAgentOptions): void
 
     function listen(): void
 
